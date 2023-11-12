@@ -192,6 +192,7 @@ public class Test1 {
         Long userId = JwtHelper.getUserId("eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAKtWKi5NUrJScgwN8dANDXYNUtJRSq0oULIyNLM0tjA0srAw0VEqLU4t8kwBikGYeYm5qUAtFcnJSrUAP2v2jEAAAAA.HDAlli6VlUTTJU8s4qVOd3hisMrKz3Ic-1ZJRZozN_B_8fd303f-ptYROdD54NavpkLIeb7e-z2_J3rxvNm8Eg");
         String username = JwtHelper.getUsername("eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAKtWKi5NUrJScgwN8dANDXYNUtJRSq0oULIyNLM0tjA0srAw0VEqLU4t8kwBikGYeYm5qUAtFcnJSrUAP2v2jEAAAAA.HDAlli6VlUTTJU8s4qVOd3hisMrKz3Ic-1ZJRZozN_B_8fd303f-ptYROdD54NavpkLIeb7e-z2_J3rxvNm8Eg");
         System.out.println("Id:"+userId+",username:"+username);
+        System.out.println("test for git");
 
     }
 
