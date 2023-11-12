@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.FormulaComponentMapper">
+
+
+    <!--//逻辑删除component表中的对应code的数据，通过update的方法
+    void updateByCodeForDelete(@Param("code") String formulaCode);-->
+    <update id="updateByCodeForDelete">
+        UPDATE formula_component
+        SET is_deleted = 1
+        WHERE formula_code = #{code}
+    </update>
+</mapper>

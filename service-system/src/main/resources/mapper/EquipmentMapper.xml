@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+        此文件所在的目录的相对路径要和所映射的mapper接口的相对路径要一致
+        此映射文件的文件名要和所映射的接口的接口名一致
+        namespace的值要和所映射的mapper接口的全类名一致
+    -->
+
+<mapper namespace="com.xcc.system.mapper.EquipmentMapper">
+
+    <resultMap id="EquipmentMap" type="com.xcc.model.qc.Equipment" autoMapping="true"></resultMap>
+    <!--条件分页查询-->
+    <!--IPage<Equipment> selectPage(Page<Equipment> pageParam,@Param("vo") EquipmentQueryVo vo);-->
+    <select id="selectPage" resultMap="EquipmentMap">
+        SELECT id,inner_code,plate_code,equipment_name,equipment_model,equipment_use,equipment_place,equipment_adjust,equipment_operator,equipment_level,equipment_status,equipment_manufacturer,
+               product_date,purchase_date,equipment_description,equipment_remark,create_time,update_time,is_deleted
+        FROM equipment
+        <where>
+            <if test="vo.equipmentName != null and vo.equipmentName != ''">
+                and equipment_name LIKE CONCAT('%',#{vo.equipmentName},'%')
+            </if>
+            <if test="vo.equipmentPlace != null and vo.equipmentPlace != ''">
+                and equipment_place LIKE CONCAT('%',#{vo.equipmentPlace},'%')
+            </if>
+                and is_deleted = 0
+        </where>
+        order by id desc
+    </select>
+
+    <!--List<String> getAllPlace();-->
+    <select id="getAllPlace" resultType="java.lang.String">
+        SELECT DISTINCT equipment_place
+        FROM equipment
+        ORDER BY equipment_place DESC
+    </select>
+
+</mapper>

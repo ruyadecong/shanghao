@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.OrderDataMapper">
+
+    <resultMap id="orderDataMap" type="com.xcc.model.order.OrderData" autoMapping="true"></resultMap>
+
+    <!--//根据查询条件分页获取订单数据
+    IPage<OrderData> selectPage(Page<OrderData> pageParam, @Param("vo")OrderSearchVo vo);-->
+    <select id="selectPage" resultMap="orderDataMap">
+        SELECT id,order_code,order_type,order_status,order_date,order_term,
+               customer_name,sales_man,order_money,mark_one,mark_two,mark_three,
+               version_no,remark,create_time,update_time,is_deleted
+        FROM order_data
+        <where>
+            <if test="vo.orderCode != null and vo.orderCode != ''">
+                and order_code LIKE CONCAT('%',#{vo.orderCode},'%')
+            </if>
+            <if test="vo.customerName != null and vo.customerName != ''">
+                and customer_name LIKE CONCAT('%',#{vo.customerName},'%')
+            </if>
+            <if test="vo.orderType != null and vo.orderType != '' and vo.orderType != '所有'">
+                and order_type = #{vo.orderType}
+            </if>
+            <if test="vo.orderStatus != null and vo.orderStatus != '' and vo.orderStatus != '所有'">
+                and order_status = #{vo.orderStatus}
+            </if>
+                and is_deleted = 0
+        </where>
+        order by order_code desc
+    </select>
+
+
+    <!--    //获取所有（包括被逻辑删除的）order_code的记录数
+    Integer countByOrderCode(@Param("orderCode") String orderCode);-->
+    <select id="countByOrderCode" resultType="java.lang.Integer">
+        SELECT COUNT(order_code)
+        FROM order_data
+        WHERE order_code = #{orderCode}
+    </select>
+
+
+</mapper>

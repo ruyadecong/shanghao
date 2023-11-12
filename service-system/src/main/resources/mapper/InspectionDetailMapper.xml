@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.InspectionDetailMapper">
+
+    <resultMap id="InspectionMap" type="com.xcc.model.entity.InspectionData" autoMapping="true"></resultMap>
+
+
+    <!--//根据检验项目的mark获取检验项目
+    InspectionDetail getInspectionByMark(@Param("mark") String mark);-->
+    <select id="getInspectionByMark" resultMap="InspectionMap">
+        SELECT inspection_item,inspection_standard,inspection_method
+        FROM inspection_detail
+        WHERE mark=#{mark} AND is_deleted =0
+    </select>
+</mapper>

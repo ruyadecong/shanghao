@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.MaterialPurchaseMapper">
+
+    <resultMap id="MaterialPurchase" type="com.xcc.model.purchase.MaterialPurchase" autoMapping="true"></resultMap>
+
+
+
+
+
+
+    <!--
+    //根据id更新备注
+    boolean updateRemarkById(@Param("id") Integer id,@Param("remark") String remark);
+    -->
+    <update id="updateRemarkById" >
+        UPDATE material_purchase SET remark = #{remark} WHERE id = #{id}
+    </update>
+    <!--//条件分页查询
+    IPage<IngredientPurchase> baseMapper.selectPage(Page<IngredientPurchase> pageParam, @Param("vo") IngredientPurchaseVo vo);-->
+    <select id="selectPage" resultMap="MaterialPurchase">
+        SELECT  id,supplier_code,supplier_name,material_code,material_name,other_material_name,batch_no,product_date,life_span,expiration_date,
+                quantity_kg,unit,order_code,delivery_date,delivery_code,received_quantity,in_date,entry_number,
+                whole_packing_price,unpacking_unit_price,unpacking_situation,storage_warehouse,subscription_date,application_date,
+                payment_date,unit_price,material_price,other_price,total_price,payment_method,material_producer,is_call_inspect,
+                is_emergency_release,is_release,report_date,purchase_serial_number,remark,create_time,update_time,is_deleted
+        FROM material_purchase
+        <where>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                AND material_code LIKE CONCAT('%',#{vo.materialCode},'%')
+            </if>
+            <if test="vo.paymentMethod != null and vo.paymentMethod != ''">
+                AND payment_method LIKE CONCAT('%',#{vo.paymentMethod},'%')
+            </if>
+            <if test="vo.supplierCode != null and vo.supplierCode != ''">
+                AND supplier_code LIKE CONCAT('%',#{vo.supplierCode},'%')
+            </if>
+            <if test="vo.purchaseDataBegin != null and vo.purchaseDataBegin != ''">
+                AND payment_date >= #{vo.purchaseDataBegin}
+            </if>
+            <if test="vo.purchaseDataEnd != null and vo.purchaseDataEnd != ''">
+                AND payment_date &lt;= #{vo.purchaseDataEnd}
+            </if>
+            <if test="vo.orderCode != null and vo.orderCode != ''">
+                AND order_code LIKE CONCAT('%',#{vo.orderCode},'%')
+            </if>
+            <if test="vo.materialName != null and vo.materialName != ''">
+                AND material_name LIKE CONCAT('%',#{vo.materialName},'%')
+            </if>
+            <if test="vo.otherMaterialName != null and vo.otherMaterialName != ''">
+                AND other_material_name LIKE CONCAT('%',#{vo.otherMaterialName},'%')
+            </if>
+            <if test="vo.entryNumber != null and vo.entryNumber != ''">
+                AND entry_number LIKE CONCAT('%',#{vo.entryNumber},'%')
+            </if>
+            <if test="vo.switchValue == false">
+                AND ( entry_number IS NULL OR entry_number = '' )
+            </if>
+                AND is_deleted = 0
+        </where>
+            ORDER BY purchase_serial_number desc
+    </select>
+
+
+    <!--//从material_purchase表中获取不重复的付款方式
+    List<String> getPayMethodList();-->
+    <select id="getPayMethodList" resultType="java.lang.String">
+        SELECT DISTINCT payment_method FROM material_purchase
+    </select>
+
+    <!--//根据原料编码mc查询指定条目数limit的数据
+    List<MaterialPurchase> getByCode(@Param("mc") String mc,@Param("limit") int limit);-->
+    <select id="getByCode" resultType="com.xcc.model.purchase.MaterialPurchase">
+        SELECT  id,supplier_code,supplier_name,material_code,material_name,other_material_name,batch_no,product_date,life_span,expiration_date,
+                quantity_kg,unit,order_code,delivery_date,delivery_code,received_quantity,in_date,entry_number,
+                whole_packing_price,unpacking_unit_price,unpacking_situation,storage_warehouse,subscription_date,application_date,
+                payment_date,unit_price,material_price,other_price,total_price,payment_method,material_producer,is_call_inspect,
+                is_emergency_release,is_release,report_date,purchase_serial_number,remark,create_time,update_time,is_deleted
+        FROM material_purchase
+        WHERE material_code = #{mc} AND is_deleted = 0
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

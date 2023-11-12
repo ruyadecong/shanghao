@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.TableListMapper">
+
+
+
+    <!--//根据所选的categoryId返回供选择的表格列表
+    List<String> getUnassignTableName(@Param("categoryId") Integer categoryId);-->
+    <select id="getUnassignTableName" resultType="java.lang.String">
+        SELECT table_name FROM table_list
+        WHERE id NOT IN (SELECT table_id FROM category_table_relation WHERE category_id = #{categoryId} AND is_deleted = 0)
+        AND is_deleted = 0
+        ORDER BY table_name
+    </select>
+</mapper>

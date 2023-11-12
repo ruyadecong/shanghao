@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.SysUserMapper">
+
+    <resultMap id="SysUserMap" type="com.xcc.model.system.SysUser" autoMapping="true"></resultMap>
+    <resultMap id="roleMap" type="com.xcc.model.system.SysRole" autoMapping="true"></resultMap>
+
+
+<!--IPage<SysUser> selectPage(IPage<SysUser> pageParam,@Param("vo") SysUserQueryVo vo);-->
+
+    <select id="selectPage" resultMap="SysUserMap">
+        SELECT id,username,password,name,phone,head_url,dept_id,post_id,description,status,create_time,update_time,is_deleted
+        FROM sys_user
+        <where>
+            <if test="vo.keyword != null and vo.keyword != ''">
+                and (username like CONCAT('%',#{vo.keyword},'%')
+                or name like CONCAT('%',#{vo.keyword},'%')
+                or phone like CONCAT('%',#{vo.keyword},'%'))
+            </if>
+            <if test="vo.createTimeBegin != null and vo.createTimeBegin != ''">
+                and create_time >= #{vo.createTimeBegin}
+            </if>
+            <if test="vo.createTimeEnd != null and vo.createTimeEnd != ''">
+                and create_time &lt;= #{vo.createTimeEnd}
+            </if>
+                and is_deleted = 0
+        </where>
+        order by id desc
+    </select>
+
+
+    <!--    //根据用户名获取其角色信息（用户名为unique）
+    List<SysRole> getUserRoleByUserName(@Param("userName") String username);-->
+    <select id="getUserRoleByUserName" resultMap="roleMap">
+        SELECT id,role_name,role_code,description,create_time,update_time,is_deleted
+        FROM sys_role
+        WHERE id IN (
+            SELECT role_id FROM sys_user_role WHERE user_id IN (
+                SELECT id FROM sys_user WHERE username = #{userName} AND is_deleted = 0)
+                                                AND is_deleted = 0 )
+          AND is_deleted = 0
+    </select>
+</mapper>

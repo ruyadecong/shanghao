@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.MaterialBasedataTempMapper">
+
+    <resultMap id="tempList" type="com.xcc.model.temp.MaterialBasedataTemp" autoMapping="true"></resultMap>
+
+<!--//获取material_database_temp中前limit条的数据
+    List<MaterialBasedataTemp> getListOfModify(@Param("limit") Integer limit);-->
+    <select id="getListOfModify" resultMap="tempList">
+        SELECT id,material_code,material_name,product_name,producter_name,submit_code,inventory_class,material_model,material_specifications,version_no,remark,update_reason,is_confirm,create_time,update_time,is_deleted
+        FROM material_basedata_temp
+        WHERE is_deleted = 0
+        ORDER BY is_confirm ASC,create_time DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

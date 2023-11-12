@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.FileCategoryMapper">
+
+
+    <!--//获取目前表格所关联的文件类型数据
+    List<String> getListOfCategoryNameByTableName(@Param("tableName") String tableName);-->
+    <select id="getListOfCategoryNameByTableName" resultType="java.lang.String">
+        SELECT fc.category_name FROM file_category fc
+        <where>
+            <if test="tableName != null and tableName != ''">
+                and id IN
+                ( SELECT ctr.category_id FROM category_table_relation ctr
+                    WHERE ctr.table_id IN (
+                        SELECT tl.id FROM table_list tl
+                            WHERE tl.table_name = #{tableName} AND is_deleted = 0 )
+                            AND is_deleted = 0)
+            </if>
+                and is_deleted = 0
+        </where>
+        ORDER BY fc.category_name DESC
+    </select>
+</mapper>

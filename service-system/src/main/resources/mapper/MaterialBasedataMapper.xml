@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.MaterialBasedataMapper">
+    
+    <resultMap id="MaterialBasedataMap" type="com.xcc.model.qc.MaterialBasedata" autoMapping="true"></resultMap>
+    <resultMap id="MaterialIngredientMap" type="com.xcc.model.entity.MaterialIngredient" autoMapping="true"></resultMap>
+
+
+    <!--条件分页查询，查出的结果用于原料信息展示-->
+    <select id="selectPage" resultMap="MaterialBasedataMap">
+        SELECT id,old_code,material_code,material_name,product_name,producter_name,submit_code,standard_number,inventory_class,material_model,material_specifications,version_no,remark,is_confirm,status
+        FROM material_basedata
+        <where>
+            <if test="vo.oldCode != null and vo.oldCode != ''">
+                and old_code LIKE CONCAT('%',#{vo.oldCode},'%')
+            </if>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                and material_code LIKE CONCAT('%',#{vo.materialCode},'%')
+            </if>
+            <if test="vo.producterName != null and vo.producterName != ''">
+                and producter_name LIKE CONCAT('%',#{vo.producterName},'%')
+            </if>
+            <if test="vo.materialName != null and vo.materialName != ''">
+                and (material_name LIKE CONCAT('%',#{vo.materialName},'%') OR product_name LIKE CONCAT('%',#{vo.materialName},'%'))
+            </if>
+            <if test="vo.searchModel == '无报送码的原料'">
+                and (submit_code = '' OR submit_code IS NULL)
+            </if>
+            <if test="vo.searchModel == '无成分数据的原料'">
+                and material_code NOT IN (SELECT DISTINCT material_code FROM material_ingredient WHERE is_deleted = 0)
+            </if>
+            <if test="vo.ingredient != null and vo.ingredient != ''">
+                and material_code IN (SELECT DISTINCT material_code FROM material_ingredient WHERE c_name LIKE CONCAT ('%',#{vo.ingredient},'%') OR inci_name LIKE CONCAT ('%',#{vo.ingredient},'%') AND is_deleted = 0)
+            </if>
+                and is_deleted = 0 and status = 1
+        </where>
+        order by material_code
+    </select>
+    <select id="getPrefixList" resultType="java.lang.String">
+        SELECT code_prefix
+        FROM material_code_prefix
+        WHERE is_deleted = 0
+        ORDER BY code_prefix
+    </select>
+
+
+    <!--//获取prefix对应的所有原料编码
+    List<String> getUsedCode(@Param("prefix") String prefix);-->
+    <select id="getUsedCode" resultType="java.lang.String">
+        SELECT material_code
+        FROM material_basedata
+        WHERE material_code
+        LIKE #{prefix}
+    </select>
+
+    <!--
+    //测试用
+    MaterialBasedata getByCode(@Param("code") String code);-->
+    <select id="getByCode" resultType="com.xcc.model.qc.MaterialBasedata">
+        SELECT * FROM material_basedata WHERE material_code = #{code}
+    </select>
+
+
+    <!--使用上面的条件分页查询获得的信息中的records中的各个原料编码来获取对应原料编码下的原料复配成分信息-->
+    <!--List<MaterialIngredient>  getIngredientByCode(@Param("code") String code)-->
+<!--    <select id="getIngredientByCode" resultMap="MaterialIngredientMap">
+        SELECT id,c_name,inci_name,ingredient_content,remark
+        FROM material_ingredient
+        WHERE material_code = #{code}
+        ORDER BY ingredient_content DESC
+    </select>-->
+
+</mapper>

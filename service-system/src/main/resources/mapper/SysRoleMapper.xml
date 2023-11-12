@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+        此文件所在的目录的相对路径要和所映射的mapper接口的相对路径要一致
+        此映射文件的文件名要和所映射的接口的接口名一致
+        namespace的值要和所映射的mapper接口的全类名一致
+    -->
+
+<mapper namespace="com.xcc.system.mapper.SysRoleMapper">
+
+    <resultMap id="SysRoleMap" type="com.xcc.model.system.SysRole" autoMapping="true"></resultMap>
+    <!--分页查询-->
+    <!--IPage<SysRole> selectPage(Page<SysRole> pageParam,@Param("vo") SysRoleQueryVo vo);-->
+
+    <select id="selectPage" resultMap="SysRoleMap">
+        SELECT id,role_name,role_code,description,create_time,update_time,is_deleted
+        FROM sys_role
+        <where>
+            <if test="vo.roleName != null and vo.roleName != ''">
+                and role_name like concat('%',#{vo.roleName},'%')
+            </if>
+                and is_deleted = 0
+        </where>
+        order by id desc
+    </select>
+</mapper>

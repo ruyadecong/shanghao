@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.ProductFormulaTempMapper">
+
+    <resultMap id="ProductFormulaTempMap" type="com.xcc.model.product.ProductFormulaTemp" autoMapping="true"></resultMap>
+
+    <!--//根据产品编码获取其在产品的配方临时表中的数据
+    List<ProductFormulaTemp> getByProductCode(@Param("productCode") String productCode);-->
+    <select id="getByProductCode" resultMap="ProductFormulaTempMap">
+        SELECT id,product_code,formula_code,formula_content,color_number,formula_mark,mark_one,mark_two,mark_three,remark,STATUS,create_time,update_time,is_deleted
+        FROM product_formula_temp
+        WHERE product_code = #{productCode} AND is_deleted = 0 AND STATUS = 1
+
+    </select>
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.FormulaDataMapper">
+
+    <resultMap id="FormulaDataMap" type="com.xcc.model.technology.FormulaData" autoMapping="true"></resultMap>
+
+    <!--//获取分页数据
+    AND #{vo.materialCode} IN (SELECT material_code FROM formula_component WHERE formula_code = formula_data.`formula_code`)
+    IPage<FormulaData> selectPage(Page<FormulaData> pageParam,@Param("vo") FormulaDataVo vo);-->
+    <select id="selectPage" resultMap="FormulaDataMap">
+        SELECT id,proof_code,formula_code,formula_name,color_number,mark_one,mark_two,mark_three,formula_dev,formula_date,class_mark,is_confirm,version_no,remark,status,create_time,update_time,is_deleted
+        FROM formula_data
+        <where>
+            <if test="vo.formulaCode != null and vo.formulaCode != ''">
+                and formula_code LIKE CONCAT('%',#{vo.formulaCode},'%')
+            </if>
+            <if test="vo.classMark >= 0">
+                AND class_mark = #{vo.classMark}
+            </if>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                AND ${vo.materialCode}
+            </if>
+                and is_deleted = 0
+        </where>
+        order by create_time desc
+    </select>
+
+    <!--//获取含有特定materialCode的半成品编码
+    List<String> selectSemiByMaterialCode(@Param("code") String code);-->
+    <select id="selectSemiByMaterialCode" resultType="java.lang.String">
+        SELECT formula_code FROM formula_data
+        WHERE #{code} IN (SELECT material_code FROM formula_component WHERE formula_code = formula_data.`formula_code` AND is_deleted = 0)
+        AND class_mark = 1 AND is_deleted = 0
+    </select>
+
+    <!--//提前给newCname加上%，用于select语句
+    List<String> getSuggestOfFormulaCode(@Param("formulaCode") String formulaCode);-->
+    <select id="getSuggestOfFormulaCode" resultType="java.lang.String">
+        SELECT formula_code
+        FROM formula_data
+        WHERE formula_code LIKE #{formulaCode}
+        AND is_deleted = 0
+    </select>
+
+
+
+
+<!--用下面的代码
+    <select id="selectPageForCraft" resultMap="FormulaDataMap">
+        SELECT id,proof_code,formula_code,formula_name,color_number,mark_one,mark_two,mark_three,formula_dev,formula_date,class_mark,is_confirm,version_no,remark,status,create_time,update_time,is_deleted
+        FROM formula_data
+        <where>
+            <if test="vo.formulaCode != null and vo.formulaCode != ''">
+                and formula_code LIKE CONCAT('%',#{vo.formulaCode},'%')
+            </if>
+            <if test="vo.classMark >= 0">
+                AND class_mark = #{vo.classMark}
+            </if>
+            <if test="vo.craftStatus != null and vo.craftStatus == '缺少工艺'">
+                AND id NOT IN (SELECT DISTINCT formula_id FROM formula_craft WHERE is_deleted = 0)
+            </if>
+            <if test="vo.craftStatus != null and vo.craftStatus == '已经有工艺'">
+                AND id IN (SELECT DISTINCT formula_id FROM formula_craft WHERE is_deleted = 0)
+            </if>
+            and is_deleted = 0
+        </where>
+        order by create_time desc
+    </select>
+-->
+
+
+    <!--//为前端的配方工艺页面获取配方的分页数据
+    IPage<FormulaData> selectPageForCraft(Page<FormulaData> pageParam,@Param("vo") FormulaDataVo vo);-->
+    <!--
+    这里和product中的类似sql使用了一种取巧的办法，通过COUNT(fc.formula_id) - SUM(fc.is_deleted)来得到craft和composition表中没有被删除的数据数量
+    -->
+    <select id="selectPageForCraft" resultMap="FormulaDataMap">
+        SELECT fd.id,fd.formula_code,fd.formula_name,fd.class_mark,fd.is_confirm,fd.version_no,fd.remark,fd.create_time,fd.update_time,fd.is_deleted,
+        (COUNT(fc.formula_id) - SUM(fc.is_deleted)) craft_number
+        FROM formula_data fd LEFT JOIN formula_craft fc ON fd.`id` = fc.`formula_id`
+        <where>
+            <if test="vo.formulaCode != null and vo.formulaCode != ''">
+                and fd.formula_code LIKE CONCAT('%',#{vo.formulaCode},'%')
+            </if>
+            <if test="vo.classMark >= 0">
+                AND fd.class_mark = #{vo.classMark}
+            </if>
+            <if test="vo.craftStatus != null and vo.craftStatus == '缺少工艺'">
+                AND fd.id NOT IN (SELECT DISTINCT formula_id FROM formula_craft WHERE is_deleted = 0)
+            </if>
+            <if test="vo.craftStatus != null and vo.craftStatus == '已经有工艺'">
+                AND fd.id IN (SELECT DISTINCT formula_id FROM formula_craft WHERE is_deleted = 0)
+            </if>
+            <if test="vo.productCode != null and vo.productCode != ''">
+                AND fd.formula_code IN (SELECT formula_code FROM product_formula WHERE product_code LIKE CONCAT('%',#{vo.productCode},'%') AND is_deleted = 0)
+            </if>
+            and fd.is_deleted = 0
+        </where>
+        GROUP BY fd.id
+        order by fd.formula_code
+    </select>
+
+
+
+
+    <!--    &lt;!&ndash;//获取分页数据，这一条和上面的不同之处在于进行了根据vo.materialCode进行了跨表查询
+        IPage<FormulaData> selectPage2(Page<FormulaData> pageParam, FormulaDataVo vo);&ndash;&gt;
+        <select id="selectPage2" resultMap="FormulaDataMap">
+            SELECT id,proof_code,formula_code,formula_name,color_number,mark_one,mark_two,mark_three,formula_dev,formula_date,class_mark,is_confirm,version_no,remark,status,create_time,update_time,is_deleted
+            FROM formula_data
+            <where>
+                <if test="vo.formulaCode != null and vo.formulaCode != ''">
+                    and formula_code LIKE CONCAT('%',#{vo.formulaCode},'%')
+                </if>
+                <if test="vo.classMark >= 0">
+                    AND class_mark = #{vo.classMark}
+                </if>
+                and is_deleted = 0
+            </where>
+            order by create_time desc
+        </select>-->
+</mapper>

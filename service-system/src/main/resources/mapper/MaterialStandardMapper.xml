@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.MaterialStandardMapper">
+
+    <resultMap id="MaterialStandardMap" type="com.xcc.model.qc.MaterialStandard" autoMapping="true"></resultMap>
+    <resultMap id="MaterialMap" type="com.xcc.model.entity.Material" autoMapping="true"></resultMap>
+
+
+    <!--//利用materialCode、mark以及is_deleted = 1 来真实删除已经逻辑删除的重复数据
+    int realDelete(@Param("materialCode") String code,@Param("mark") String mark);-->
+    <delete id="realDelete">
+        DELETE FROM material_standard WHERE material_code = #{materialCode} AND mark = #{mark} AND is_deleted = 1
+    </delete>
+
+
+    <!--IPage<Material> selectPage2(Page<Material> pageParam,@Param("vo") MaterialStandardVo vo);-->
+    <!--这部分代码需要大改，现阶段由于原料基础数据表和原料标准数据表的原料编码相差太大，暂时先用原料标准数据表来获取原料编码列表，后面要将原料编码列表从原料基础数据表中获取-->
+    <!--修改后的sql语句应该就是后面被注释掉的-->
+    <!--上面的方案可能还是不行，这样还是没有办法解决获取的原料编码列表没有id的问题-->
+    <select id="selectPage" resultType="com.xcc.model.entity.Material">
+        SELECT DISTINCT material_code ,CONCAT(material_code , '原料标准') AS 'standardName' FROM material_standard
+        <where>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                and material_code LIKE CONCAT('%',#{vo.materialCode},'%')
+            </if>
+                and is_deleted = 0 and status = 1
+        </where>
+        ORDER BY material_code
+    </select>
+
+    <!--IPage<MaterialStandard> selectPage(Page<MaterialStandard> pageParam,@Param("vo") MaterialStandardVo vo);-->
+<!--    <select id="selectPage" resultMap="MaterialStandardMap">
+        SELECT id,material_code,mark,inspection_item,inspection_standard,inspection_method,remark,STATUS,create_time,update_time,is_deleted
+        FROM material_standard
+        <where>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                and material_code LIKE CONCAT('%',#{vo.materialCode},'%')
+            </if>
+            and is_deleted = 0 and status = 1
+        </where>
+        ORDER BY material_code
+    </select>-->
+
+    <!--
+    <select id="selectPage" resultType="com.xcc.model.entity.Material">
+        SELECT DISTINCT material_code ,CONCAT(material_code , '原料标准') AS 'standardName' FROM material_basedata
+        <where>
+            <if test="vo.materialCode != null and vo.materialCode != ''">
+                and material_code LIKE CONCAT('%',#{vo.materialCode},'%')
+            </if>
+                and is_deleted = 0 and status = 1
+        </where>
+        ORDER BY material_code
+    </select>
+
+    -->
+
+
+
+    <!--List<StandardData> selectListByCode(@Param("code") String materialCode);-->
+
+    <select id="selectListByCode" resultType="com.xcc.model.entity.StandardData">
+        SELECT mat.mark,mat.id,mat.inspection_item,mat.inspection_standard,mat.inspection_method,mat.remark,ins.inspection_order
+        FROM material_standard mat LEFT JOIN inspection_detail ins ON mat.mark = ins.mark
+        WHERE mat.material_code = #{code} and mat.is_deleted = 0 and mat.status = 1
+        ORDER BY ins.inspection_order
+    </select>
+
+
+    <!--//逻辑删除前先要进行判断，看是否已经存在被删除过一回的相同的materialCode、mark数据，如果有则先调用realDelete，再调用逻辑删除；如果没有则直接调用逻辑删除
+    Integer countByCodeAndMark(@Param("materialCode") String code,@Param("mark") String mark);
+    //根据sql语句，这里统计的count（*）只是is_deleted = 1的记录-->
+    <select id="countByCodeAndMark" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM material_standard WHERE material_code = #{materialCode} AND mark = #{mark} AND is_deleted = 1
+    </select>
+</mapper>

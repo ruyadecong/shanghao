@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.MaterialIngredientMapper">
+
+    <resultMap id="MaterialIngredientMap" type="com.xcc.model.entity.MaterialIngredient" autoMapping="true"></resultMap>
+
+    <!--    //使用update方法逻辑删除ingredient表中的对应code的数据
+    boolean updateByCode(@Param("code") String materialCode);-->
+    <update id="updateByCodeForDelete">
+        UPDATE material_ingredient
+        SET is_deleted = 1
+        WHERE material_code = #{code}
+    </update>
+
+
+    <!--//根据原料编码获取原料成分信息
+    List<MaterialIngredient> getByCode(@Param("code") String code);-->
+    <select id="getByCode" resultMap="MaterialIngredientMap">
+        SELECT id,material_code,material_name,c_name,inci_name,ingredient_content,remark,STATUS,create_time,update_time,is_deleted
+        FROM material_ingredient
+        WHERE material_code = #{code} AND is_deleted = 0
+        ORDER BY ingredient_content DESC
+    </select>
+
+
+
+    <!--//测试用
+    List<String> getCodeList();-->
+    <select id="getCodeList" resultType="java.lang.String">
+        SELECT DISTINCT material_code FROM material_ingredient
+    </select>
+</mapper>

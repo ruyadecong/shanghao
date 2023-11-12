@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.OrderProductMapper">
+
+    <resultMap id="OrderProduct" type="com.xcc.model.order.OrderProduct" autoMapping="true"></resultMap>
+    <!--//根据订单id获取订单的产品
+    List<OrderProduct> getProductByOrderId(@Param("orderId") Integer orderId);-->
+    <select id="getProductByOrderId" resultMap="OrderProduct">
+        SELECT id,order_code,product_code,product_amount,product_type,special_reqirement,batch_no,net_weight,weight_model,unit,
+               mark_one,mark_two,mark_three,remark,create_time,update_time,is_deleted
+        FROM order_product
+        WHERE order_code = (SELECT order_code FROM order_data WHERE id = #{orderId} AND is_deleted = 0)
+          AND is_deleted = 0
+        ORDER BY product_code
+    </select>
+
+
+    <!--//根据产品编码前几位获取建议列表
+    List<String> getSuggestListOfProductCode(@Param("productCode") String productCode);-->
+    <select id="getSuggestListOfProductCode" resultType="java.lang.String">
+        SELECT product_code
+        FROM product_data
+        WHERE product_code LIKE #{productCode}
+        AND is_deleted = 0 AND is_confirm = 1
+    </select>
+
+
+    <!--//根据产品编码前几位，从order_product表中获取产品编码的建议列表
+    List<String> getSuggestListOfOrderProductCode(@Param("productCode") String productCode,@Param("orderCode") String orderCode);-->
+    <select id="getSuggestListOfOrderProductCode" resultMap="OrderProduct">
+        <!--SELECT CONCAT(order_code,'$#$',product_code)
+        SELECT product_code-->
+        SELECT id,order_code,product_code,product_amount,product_type,special_reqirement,batch_no,net_weight,weight_model,unit,
+        mark_one,mark_two,mark_three,remark,create_time,update_time,is_deleted
+        FROM order_product
+        WHERE product_code LIKE #{productCode} and order_code != #{orderCode}
+        AND is_deleted = 0
+    </select>
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.FormulaDataTempMapper">
+
+
+    <!--//获取formula_data_temp中的数据
+    List<FormulaDataTemp> getListOfModify(@Param("limit") Integer limit);-->
+    <select id="getListOfModify" resultType="com.xcc.model.temp.FormulaDataTemp">
+        SELECT id,proof_code,formula_code,formula_name,color_number,mark_one,mark_two,mark_three,formula_dev,formula_date,class_mark,is_confirm,update_reason,version_no,remark,STATUS,create_time,update_time,is_deleted
+        FROM formula_data_temp
+        WHERE is_deleted = 0
+        ORDER BY is_confirm ASC,create_time DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

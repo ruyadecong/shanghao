@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.ProductFormulaMapper">
+
+    <resultMap id="ProductFormulaMap" type="com.xcc.model.product.ProductFormula" autoMapping="true"></resultMap>
+    <!--//根据产品id获取其配方数据
+    List<ProductFormula> getFormulaListByProductId(Integer productId);-->
+    <select id="getFormulaListByProductId" resultType="com.xcc.model.product.ProductFormula">
+        SELECT id,product_code,formula_code,color_number,formula_content,formula_mark,mark_one,mark_two,mark_three,
+               is_confirm,version_no,remark,STATUS,create_time,update_time,is_deleted
+        FROM product_formula
+        WHERE product_code = (SELECT product_code FROM product_data WHERE id = #{productId} AND is_deleted = 0 AND STATUS = 1)
+          AND is_deleted = 0 AND STATUS = 1
+        ORDER BY formula_content DESC
+    </select>
+
+
+    <!--//根据产品编码获取其所有的配方数据
+    List<ProductFormula> getByProductCode(@Param("productCode") String productCode);-->
+    <select id="getByProductCode" resultMap="ProductFormulaMap">
+        SELECT id,product_code,formula_code,color_number,formula_content,formula_mark,mark_one,mark_two,mark_three,
+               is_confirm,version_no,remark,STATUS,create_time,update_time,is_deleted
+        FROM product_formula
+        WHERE product_code = #{productCode} AND is_deleted = 0
+        ORDER BY formula_content DESC
+    </select>
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.FileDataMapper">
+
+    <resultMap id="FileDataMap" type="com.xcc.model.technology.FileData" autoMapping="true"></resultMap>
+
+
+    <!--//条件分页查询
+    IPage<FileData> selectPage(Page<FileData> pageParam, @Param("vo") FileVo vo);-->
+    <select id="selectPage" resultType="com.xcc.model.technology.FileData">
+        SELECT id,correlation_id,original_name,file_name,file_path,category_id,file_category,
+               file_type,upload_user,mark_one,mark_two,mark_three,mark_four,mark_five,
+               version_no,remark,status,create_time,update_time,is_deleted
+        FROM file_data
+        <where>
+            <if test="vo.tableName != null and vo.tableName != ''">
+                and category_id IN
+                (SELECT ctr.category_id FROM category_table_relation ctr WHERE ctr.table_id IN
+                    (SELECT tl.id FROM table_list tl WHERE tl.table_name = #{vo.tableName}
+                        AND is_deleted = 0)
+                AND is_deleted = 0)
+            </if>
+            <if test="vo.fileName != null and vo.fileName != ''">
+                and file_name LIKE CONCAT('%',#{vo.fileName},'%')
+            </if>
+            <if test="vo.fileCategory != null and vo.fileCategory != ''">
+                and file_category LIKE CONCAT('%',#{vo.fileCategory},'%')
+            </if>
+            <if test="vo.originalName != null and vo.originalName != ''">
+                and original_name LIKE CONCAT('%',#{vo.originalName},'%')
+            </if>
+            <if test="vo.uploadUser != null and vo.uploadUser != ''">
+                and upload_user LIKE CONCAT('%',#{vo.uploadUser},'%')
+            </if>
+                and is_deleted = 0
+        </where>
+        ORDER BY #{vo.orderField} DESC
+    </select>
+
+
+
+
+    <!--//在file_data表中根据material_basedata表中的id获取相应的文件列表（获取过程要加入表格名称判断，以获取指定表格中可以显示的文件类型）
+    List<FileData> getFileListByMaterialId(@Param("correlationId") Integer id,@Param("tableName") String tableName);-->
+    <select id="getFileListByMaterialId" resultMap="FileDataMap">
+        SELECT id,correlation_id,original_name,file_name,file_path,category_id,file_category,
+               file_type,upload_user,mark_one,mark_two,mark_three,mark_four,mark_five,
+               version_no,remark,STATUS,create_time,update_time,is_deleted
+        FROM file_data
+        WHERE correlation_id = #{correlationId}
+          AND (category_id IN(
+            SELECT category_id FROM category_table_relation
+            WHERE table_id IN (
+                SELECT id FROM table_list WHERE table_name = #{tableName}))
+                   OR category_id = 0)
+          AND is_deleted = 0
+        ORDER BY file_name DESC
+
+    </select>
+
+    <!--//获取所有的产品标准
+    List<FileData> getAllProductStandard();-->
+    <select id="getAllProductStandard" resultMap="FileDataMap">
+        SELECT id,correlation_id,original_name,file_name,file_path,category_id,file_category,
+               file_type,upload_user,mark_one,mark_two,mark_three,mark_four,mark_five,
+               version_no,remark,STATUS,create_time,update_time,is_deleted
+        FROM file_data
+        WHERE category_id IN (SELECT id FROM file_category WHERE category_name IN ('产品标准','尚好企业标准') AND is_deleted = 0)
+          AND is_deleted = 0
+        ORDER BY file_name
+    </select>
+</mapper>

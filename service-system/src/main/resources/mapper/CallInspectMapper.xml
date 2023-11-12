@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.CallInspectMapper">
+
+    <!--//确认报检单打印完成，根据serialNumber修改其is_print为1
+    int updatePrintBySerialNumber(@Param("serialNumber") String serialNumber);-->
+    <update id="updatePrintBySerialNumber" >
+        UPDATE call_inspect SET is_print = 1 WHERE serial_number = #{serialNumber} AND is_deleted = 0
+    </update>
+
+
+    <!--//获取前limit条serial_number的未删除的报检数据的serial_number
+    List<String> getListOfSerialNumber(@Param("limit") Integer limit, @Param("vo")MaterialBasedataVo vo);-->
+    <select id="getListOfSerialNumber" resultType="java.lang.String">
+<!--
+        SELECT DISTINCT serial_number
+        FROM call_inspect
+        WHERE is_deleted = 0
+        ORDER BY serial_number DESC
+        LIMIT #{limit}
+        -->
+        SELECT DISTINCT serial_number
+        FROM call_inspect
+        <where>
+            <if test="vo.materialCode != '' and vo.materialCode != null">
+                AND purchase_id IN (
+                SELECT id FROM material_purchase
+                WHERE material_code LIKE CONCAT('%',#{vo.materialCode},'%') AND is_deleted = 0)
+            </if>
+            <if test="vo.inspectSerialNumber != '' and vo.inspectSerialNumber != null">
+                AND serial_number LIKE CONCAT('%',#{vo.inspectSerialNumber},'%')
+            </if>
+            AND is_deleted = 0
+        </where>
+        ORDER BY serial_number DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcc.system.mapper.SupplierDataMapper">
+
+    <resultMap id="SupplierMap" type="com.xcc.model.purchase.SupplierData" autoMapping="true"></resultMap>
+
+    <select id="getAllPSort" resultType="java.lang.String">
+        SELECT DISTINCT supplier_sort
+        FROM supplier_data
+        ORDER BY supplier_sort DESC
+    </select>
+    <select id="selectPage" resultMap="SupplierMap">
+        SELECT id,supplier_code,supplier_sort,simple_name,total_name,country,address,business_license,permit_code,
+               is_key,liaison_person,liaison_method,materials,remark,status,create_time,update_time,is_deleted
+        FROM supplier_data
+        <where>
+            <if test="vo.supplierCode != null and vo.supplierCode != ''">
+                and supplier_code LIKE CONCAT('%',#{vo.supplierCode},'%')
+            </if>
+            <if test="vo.supplierSort != null and vo.supplierSort != ''">
+                and supplier_sort LIKE CONCAT('%',#{vo.supplierSort},'%')
+            </if>
+            and is_deleted = 0 and status = 1
+        </where>
+        order by supplier_sort,supplier_code desc
+    </select>
+</mapper>
